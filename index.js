@@ -5,46 +5,35 @@ var svg = d3.select("svg"),
   g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 var parseTime = d3.timeParse("%Y%m%d");
-
 var x = d3.scaleLinear().range([0, width]),
   y = d3.scaleLinear().range([height, 0]),
   z = d3.scaleOrdinal(d3.schemeCategory10);
 
 var line = d3.line()
+  .x(function(d) { return x(d.passYds); })
+  .y(function(d) { return y(d.points); })
   .curve(d3.curveBasis)
-  .x(function(d) { return x(d.Yds); })
-  .y(function(d) { return y(d.points); });
 
 d3.csv("data.csv", type, function(error, data) {
   if (error) throw error;
+  const games = getGamesFromData(data)
+  console.log('list of games', games)
 
-  var games = data.columns.map(function(id) {
-    return {
-      id,
-      values: data.map(function(d, i) {
-        return {
-          passYds: d.Yds,
-          points: d.Result
-        }
-      })
-    }
-  });
+  x.domain(d3.extent(games, function(d) { return d.passYds; }));
 
-  console.log(games)
+  y.domain(d3.extent(games, function(d) { return d.points }));
 
-  x.domain(d3.extent(data, function(d) { return d.passYds; }));
-
-  y.domain([
-    d3.min(games, function(g) { return d3.min(g.values, function(d) { return d.points; }); }),
-    d3.max(games, function(g) { return d3.max(g.values, function(d) { return d.points; }); })
-  ]);
-
-  z.domain(games.map(function(g) { return g.id; }));
+  z.domain(games.map(function(g, i) { return i; }));
 
   g.append("g")
     .attr("class", "axis axis--x")
     .attr("transform", "translate(0," + height + ")")
-    .call(d3.axisBottom(x));
+    .call(d3.axisBottom(x))
+    .append('text')
+    .text('Passing Yards')
+    .attr('fill', '#000')
+    .attr('dy', '25px')
+    .attr('x', "150px")
 
   g.append("g")
     .attr("class", "axis axis--y")
@@ -56,30 +45,40 @@ d3.csv("data.csv", type, function(error, data) {
     .attr("fill", "#000")
     .text("Points");
 
-  var game = g.selectAll(".game")
-    .data(games)
-    .enter().append("g")
-    .attr("class", "game");
-
-  game.append("path")
+  g.append('g').append("path")
+    .datum(games)
     .attr("class", "line")
-    .attr("d", function(d) { return line(d.values); })
-    .style("stroke", function(d) { return z(d.id); });
+    .attr("d", function(d) {
+      const linepath = line(d)
 
-  game.append("text")
-    .datum(function(d) { return {id: d.id, value: d.values[d.values.length - 1]}; })
-    .attr("transform", function(d) { return "translate(" + x(d.value.passYds) + "," + y(d.value.points) + ")"; })
-    .attr("x", 3)
-    .attr("dy", "0.35em")
-    .style("font", "10px sans-serif")
-    .text(function(d) { return d.id; });
+      return linepath;
+    })
+    .style("stroke", function(d) { return '#0099cc'; }); //returns the color
+
+
 });
 
 function type(d, _, columns) {
   d.date = parseTime(d.date);
   d.Result = d.Result.split('-')[0].split(' ')[1]
   for (var i = 1, n = columns.length, c; i < n; ++i) {
-    d[c = columns[i]] = d[c];
+    d[c = columns[i]] = isNaN(parseInt(d[c])) ? 0 : parseInt(d[c]) ;
   }
   return d;
 }
+function getGamesFromData(data) {
+
+  var games = data.map(function(game, i) {
+
+    return {
+      passYds: game.Yds,
+      points: game.Result,
+
+    }
+  }).sort(function(a, b) {
+    return a.passYds - b.passYds
+  });
+
+  games.pop()
+  return games
+  }
