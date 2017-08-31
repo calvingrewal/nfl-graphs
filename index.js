@@ -12,17 +12,7 @@ function drawGraph(id, dataType, xAxisLabel) {
 
   var parseTime = d3.timeParse("%Y%m%d");
   var x = d3.scaleLinear().range([0, width]),
-    y = d3.scaleLinear().range([height, 0]),
-    z = d3.scaleOrdinal(d3.schemeCategory10);
-
-  var line = d3.line()
-    .x(function(d) {
-      return x(d.data);
-    })
-    .y(function(d) {
-      return y(d.points);
-    })
-    .curve(d3.curveLinear)
+    y = d3.scaleLinear().range([height, 0])
 
   d3.csv("data.csv", type, function(error, data) {
     if (error) throw error;
@@ -34,10 +24,6 @@ function drawGraph(id, dataType, xAxisLabel) {
 
     y.domain(d3.extent(games, function(d) {
       return d.points
-    }));
-
-    z.domain(games.map(function(g, i) {
-      return i;
     }));
 
     g.append("g")
@@ -78,6 +64,8 @@ function drawGraph(id, dataType, xAxisLabel) {
   function type(d, _, columns) {
     d.date = parseTime(d.date);
     d.Result = d.Result.split('-')[0].split(' ')[1]
+    d.Age = parseInt(d.Age.split('-')[0]) + parseInt(d.Age.split('-')[1]) / 365
+
     for (var i = 1, n = columns.length, c; i < n; ++i) {
       d[c = columns[i]] = isNaN(parseFloat(d[c])) ? 0 : parseFloat(d[c]);
     }
@@ -106,5 +94,5 @@ drawGraph('#graph1', 'Yds', 'Passing Yards')
 drawGraph('#graph2', 'Rate', 'Passer Rating')
 drawGraph('#graph3', 'Int', 'Interceptions')
 drawGraph('#graph4', 'Cmp%', 'Completion %')
-drawGraph('#graph5', 'TD', 'Touchdowns')
+drawGraph('#graph5', 'Age', 'QB Age')
 drawGraph('#graph6', 'Y/A', 'Yards Per Attempt')
