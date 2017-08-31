@@ -1,7 +1,7 @@
-function drawGraph(id, dataType) {
+function drawGraph(id, dataType, xAxisLabel) {
   var svg = d3.select(id),
     margin = {
-      top: 20,
+      top: 10,
       right: 80,
       bottom: 30,
       left: 50
@@ -45,7 +45,7 @@ function drawGraph(id, dataType) {
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x))
       .append('text')
-      .text(dataType)
+      .text(xAxisLabel)
       .attr('fill', '#000')
       .attr('dy', '25px')
       .attr('x', "150px")
@@ -60,20 +60,10 @@ function drawGraph(id, dataType) {
       .attr("fill", "#000")
       .text("Points");
 
-    // g.append('g').append("path")
-    //   .datum(games)
-    //   .attr("class", "line")
-    //   .attr("d", function(d) {
-    //     const linepath = line(d)
-    //
-    //     return linepath;
-    //   })
-    //   .style("stroke", function(d) {
-    //     return `hsl(${Math.floor(Math.random()*360)}, 100%, 40%)`;
-    //   });
-    window.g = g
     const color = `hsl(${Math.floor(Math.random()*360)}, 100%, 40%)`
-    g.selectAll('.dot')
+    g.append('g')
+      .attr('class', 'circle-container')
+      .selectAll('.dot')
       .data(games)
       .enter()
       .append('circle')
@@ -89,7 +79,7 @@ function drawGraph(id, dataType) {
     d.date = parseTime(d.date);
     d.Result = d.Result.split('-')[0].split(' ')[1]
     for (var i = 1, n = columns.length, c; i < n; ++i) {
-      d[c = columns[i]] = isNaN(parseInt(d[c])) ? 0 : parseInt(d[c]);
+      d[c = columns[i]] = isNaN(parseFloat(d[c])) ? 0 : parseFloat(d[c]);
     }
     return d;
   }
@@ -112,8 +102,9 @@ function drawGraph(id, dataType) {
   }
 }
 
-drawGraph('#graph1', 'Yds')
-drawGraph('#graph2', 'Rate')
-drawGraph('#graph3', 'Int')
-drawGraph('#graph4', 'Cmp%')
-drawGraph('#graph5', 'TD')
+drawGraph('#graph1', 'Yds', 'Passing Yards')
+drawGraph('#graph2', 'Rate', 'Passer Rating')
+drawGraph('#graph3', 'Int', 'Interceptions')
+drawGraph('#graph4', 'Cmp%', 'Completion %')
+drawGraph('#graph5', 'TD', 'Touchdowns')
+drawGraph('#graph6', 'Y/A', 'Yards Per Attempt')
