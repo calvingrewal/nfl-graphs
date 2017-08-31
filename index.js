@@ -60,18 +60,28 @@ function drawGraph(id, dataType) {
       .attr("fill", "#000")
       .text("Points");
 
-    g.append('g').append("path")
-      .datum(games)
-      .attr("class", "line")
-      .attr("d", function(d) {
-        const linepath = line(d)
-
-        return linepath;
-      })
-      .style("stroke", function(d) {
-        return `hsl(${Math.floor(Math.random()*360)}, 100%, 40%)`;
-      }); //returns the color
-
+    // g.append('g').append("path")
+    //   .datum(games)
+    //   .attr("class", "line")
+    //   .attr("d", function(d) {
+    //     const linepath = line(d)
+    //
+    //     return linepath;
+    //   })
+    //   .style("stroke", function(d) {
+    //     return `hsl(${Math.floor(Math.random()*360)}, 100%, 40%)`;
+    //   });
+    window.g = g
+    const color = `hsl(${Math.floor(Math.random()*360)}, 100%, 40%)`
+    g.selectAll('.dot')
+      .data(games)
+      .enter()
+      .append('circle')
+      .attr("class", "dot")
+      .attr("r", 3.5)
+      .attr('cx', function(d) { return x(d.data) })
+      .attr('cy', function(d) { return y(d.points) })
+      .style("fill", function(d) { return color });
 
   });
 
